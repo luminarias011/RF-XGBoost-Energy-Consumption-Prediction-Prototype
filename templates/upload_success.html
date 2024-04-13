@@ -1,0 +1,107 @@
+{% extends 'partials/partial.html' %}
+
+{% block head %}
+  <title>Start Prediction</title>
+{% endblock %}
+
+{% block stylesheets %}
+  <style>
+    body{
+      overflow-y: scroll;
+      overflow-x: auto;
+    }
+
+    .loader {
+      display: none;
+    }
+
+    .loader.active {
+      display: block;
+      width: 50px;
+      aspect-ratio: 1.154;
+      position: relative;
+      background: conic-gradient(from 120deg at 50% 64%, #0000, #25b09b 1deg 120deg, #0000 121deg);
+      animation: l27-0 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
+    }
+    .loader.active:before,
+    .loader.active:after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      transform-origin: 50% 66%;
+      animation: l27-1 1.5s infinite;
+    }
+    .loader.active:after {
+      --s: -1;
+    }
+    @keyframes l27-0 {
+      0%,
+      30% {
+        transform: rotate(0);
+      }
+      70% {
+        transform: rotate(120deg);
+      }
+      70.01%,
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes l27-1 {
+      0% {
+        transform: rotate(calc(var(--s, 1) * 120deg)) translate(0);
+      }
+      30%,
+      70% {
+        transform: rotate(calc(var(--s, 1) * 120deg)) translate(calc(var(--s, 1) * -5px), 10px);
+      }
+      100% {
+        transform: rotate(calc(var(--s, 1) * 120deg)) translate(0);
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <h1>Start Prediction</h1>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-4">
+        <p>
+          Dataset uploaded successfully: <strong>{{ filename }}</strong>
+        </p>
+        <form action="/simulate" method="post">
+          <div class="form-group">
+            <input type="hidden" name="filename" value="{{ filename }}" />
+          </div>
+          <button class="btn mt-3" type="submit" id="runSimulationBtn" value="Run Simulation">Run Models</button>
+        </form>
+      </div>
+      <div class="col-md-4"></div>
+    </div>
+
+    <br /><br />
+    <div class="row mt-5">
+      <div class="col center text-center justify-content-center">
+        <div class="loader mx-auto" id="loader">
+        </div>
+        <p class="loader" id="loader">Running</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    document.getElementById('runSimulationBtn').addEventListener('click', function () {
+      document.getElementById('loader').classList.add('active')
+    })
+  </script>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,600,700,800" rel="stylesheet" />
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet" />
+
+    <!-- CSS Files -->
+    <link href="{{ url_for('static', filename = 'assets/css/nucleo-icons.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename = 'assets/css/theme-switcher.css') }}" rel="stylesheet" />
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link href="{{ url_for('static', filename = 'assets/demo/demo.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename = 'assets/css/black-dashboard.css') }}" rel="stylesheet" />
+
+    {% include 'includes/head_script.html' %}
+    {% block head %}
+
+    {% endblock %}
+
+    {% block stylesheets %}
+
+    {% endblock %}
+  </head>
+
+  <body class="">
+    <div class="wrapper mt-0 mb-0">
+      <div class="main-panel ">
+        {% include 'includes/navigation.html' %}
+
+        {% block content %}
+
+        {% endblock %}
+
+        {% include 'includes/footer.html' %}
+      </div>
+    </div>
+
+    {% include 'includes/fixed-plugin.html' %}
+
+    {% include 'includes/scripts.html' %}
+
+    <!-- Specific Page JS goes HERE -->
+    {% block javascripts %}
+
+    {% endblock %}
+  </body>
+</html>

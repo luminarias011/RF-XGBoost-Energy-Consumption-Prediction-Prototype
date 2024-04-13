@@ -1,0 +1,44 @@
+{% extends 'partials/partial.html' %}
+
+{% block head %}
+  <title>Upload Dataset</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body{
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <h1 class="">Upload Dataset</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-4">
+        <form action="/upload" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label class="form-control custom-file-label" for="file">Select dataset file (CSV format):</label><br />
+            <input class="form-control custom-file-input" type="file" id="file" name="file" accept=".csv" /><br />
+          </div>
+          <button class="btn mt-3" type="submit" value="Upload">Upload</button>
+        </form>
+      </div>
+      <div class="col-md-4"></div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    
+  </script>
+{% endblock %}
