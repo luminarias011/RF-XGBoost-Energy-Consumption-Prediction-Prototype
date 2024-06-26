@@ -17,12 +17,17 @@
   <div class="content">
     <div class="row">
       <div class="col text-center mb-5">
-        <h1>Prediction Results</h1>
+        <h1>Metrics Results</h1>
       </div>
     </div>
 
     <div class="container">
 
+      <div class="row">
+        <div class="col text-center mb-2">
+          <h3>Original Dataset (Train & Test)</h3>
+        </div>
+      </div>
       <div class="ml-n5 mr-n5 mb-5">
         <div class="d-flex">
           <div class="mx-auto" style="flex-basis: 100%;">
@@ -139,6 +144,212 @@
       </div>
 
       <div class="row">
+        <div class="col text-center mb-2">
+          <h3>Second Dataset for Model Testing</h3>
+        </div>
+      </div>
+
+      <div class="ml-n5 mr-n5 mb-5">
+        <div class="d-flex">
+          <div class="mx-auto" style="flex-basis: 100%;">
+            <h2>Random Forest (RF) Model</h2>
+            <table class="table-sm table-bordered table-hover">
+              <thead>
+                <tr class="bg-danger">
+                  <th>Metrics</th>
+                  <th>Testing Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-light">
+                  <td>R-Squared</td>
+                  <td>{{ harmonic_r2_testing }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>MSE</td>
+                  <td>{{ harmonic_mse_testing }}</td>
+                </tr>
+
+                <tr class="bg-light">
+                  <td>RMSE</td>
+                  <td>{{ harmonic_rmse_testing }}</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mx-auto" style="flex-basis: 100%;">
+            <h2>XGBoost Model</h2>
+            <table class="table-sm table-bordered table-hover">
+              <thead>
+                <tr class="bg-danger">
+                  <th>Metrics</th>
+                  <th>Testing Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-light">
+                  <td>R-Squared</td>
+                  <td>{{ harmonic_r2_XGB_testing }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>MSE</td>
+                  <td>{{ harmonic_mse_XGB_testing }}</td>
+                </tr>
+
+                <tr class="bg-light">
+                  <td>RMSE</td>
+                  <td>{{ harmonic_rmse_XGB_testing }}</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mx-auto" style="flex-basis: 100%;">
+            <h2>Hybrid RF-XGB Model</h2>
+            <table class="table-sm table-bordered table-hover">
+              <thead>
+                <tr class="bg-danger">
+                  <th>Metrics</th>
+                  <th>Testing</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-light">
+                  <td>R-Squared</td>
+                  <td>{{ new_r2_testing }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>MSE</td>
+                  <td>{{ new_mse_testing }}</td>
+                </tr>
+
+                <tr class="bg-light">
+                  <td>RMSE</td>
+                  <td>{{ new_rmse_testing }}</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!--<div class="row">
+        <div class="col text-center mb-5">
+          <h2>Validation Results</h2>
+        </div>
+      </div>-->
+
+      <!--<div class="ml-n5 mr-n5 mb-5">
+        <div class="d-flex">
+          <div class="mx-auto" style="flex-basis: 100%;">
+            <h2>Random Forest (RF) Model</h2>
+            <table class="table-sm table-bordered table-hover">
+              <thead>
+                <tr class="bg-danger">
+                  <th>Metrics</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-light">
+                  <td>R-Squared</td>
+                  <td>{{ combined_cv_score_rf_r2 }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>MSE</td>
+                  <td>{{ combined_cv_score_rf_mse }}</td>
+                </tr>
+
+                <tr class="bg-light">
+                  <td>RMSE</td>
+                  <td>{{ combined_cv_score_rf_rmse }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>Running Time:</td>
+                  <td colspan="2" class="text-right">{{ rf_elapsed_time }}s</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mx-auto" style="flex-basis: 100%;">
+            <h2>XGBoost Model</h2>
+            <table class="table-sm table-bordered table-hover">
+              <thead>
+                <tr class="bg-danger">
+                  <th>Metrics</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-light">
+                  <td>R-Squared</td>
+                  <td>{{ combined_cv_score_xgb_r2 }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>MSE</td>
+                  <td>{{ combined_cv_score_xgb_mse }}</td>
+                </tr>
+
+                <tr class="bg-light">
+                  <td>RMSE</td>
+                  <td>{{ combined_cv_score_xgb_rmse }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>Running Time:</td>
+                  <td colspan="2" class="text-right">{{ xgb_elapsed_time }}s</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mx-auto" style="flex-basis: 100%;">
+            <h2>Hybrid RF-XGB Model</h2>
+            <table class="table-sm table-bordered table-hover">
+              <thead>
+                <tr class="bg-danger">
+                  <th>Metrics</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-light">
+                  <td>R-Squared</td>
+                  <td>{{ combined_cv_score_r2 }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>MSE</td>
+                  <td>{{ combined_cv_score_mse }}</td>
+                </tr>
+
+                <tr class="bg-light">
+                  <td>RMSE</td>
+                  <td>{{ combined_cv_score_rmse }}</td>
+                </tr>
+
+                <tr class="bg-neutral">
+                  <td>Running Time:</td>
+                  <td colspan="2" class="text-right">{{ hybrid_elapsed_time }}s</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>-->
+
+      <div class="row">
         <div class="col text-center mb-5">
           <div>Total Running Time: {{ total_elapsed_time }}s</div>
         </div>
@@ -205,12 +416,18 @@
       </div>
 
       <div class="row">
+        <div class="col text-center mb-5">
+          <h1>Prediction Results</h1>
+        </div>
+      </div>
+
+      <div class="row">
         <div class="col-12">
           <div class="card card-chart mt-5">
             <div class="card-header">
               <div class="row">
                 <div class="col-sm-6 text-left">
-                  <h2 class="card-title">Performance</h2>
+                  <h2 class="card-title">Prediction</h2>
                 </div>
                 <div class="col-sm-6">
                   <div class="btn-group btn-group-toggle float-right" data-toggle="buttons">
@@ -242,6 +459,9 @@
         </div>
       </div>
 
+      <button id="downloadImage">Download Image</button>
+      <button id="downloadExcel">Download Excel</button>
+
       <!-- <div class="row">
         <div class="col-md-4 mx-auto">
           <div id="rf_scatter_plot" style="width: auto; height: auto;"></div>
@@ -265,9 +485,11 @@
                                     xgb_cooling_data=xgb_cooling_data,
                                     hybrid_heating_data=hybrid_heating_data,
                                     hybrid_cooling_data=hybrid_cooling_data  -->
+
 {% block javascripts %}
   {% set limit = 73 %}
   {% set hybrid_heating_data2 = hybrid_heating_data[:limit] %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
   <script>
     var currentChart = null; // Holds the current chart instance
 
@@ -335,9 +557,9 @@
 
     // ? XGBoost
     // ? Data preparation
-    var xgb_xValues = {{ range(xgb_heating_data | length) | list | tojson }};
-    var xgb_actualYValues = {{ xgb_heating_data | map(attribute=0) | list | tojson }};
-    var xgb_predictedYValues = {{ xgb_heating_data | map(attribute=1) | list | tojson }};
+    //var xgb_xValues = {{ range(xgb_heating_data | length) | list | tojson }};
+    //var xgb_actualYValues = {{ xgb_heating_data | map(attribute=0) | list | tojson }};
+    //var xgb_predictedYValues = {{ xgb_heating_data | map(attribute=1) | list | tojson }};
 
     // ? HYBRID
     // ? Data preparation
@@ -368,7 +590,7 @@
 
     function createScatterPlot(xValues, actualYValues, predictedYValues) {
       if (currentChart) {
-        currentChart.destroy(); // Destroy the current chart instance if exists
+        currentChart.destroy(); 
       }
       const ctx = document.getElementById('hybrid_scatter_plot2').getContext('2d');
       currentChart = new Chart(ctx, {
@@ -382,7 +604,7 @@
             showLine: false,
             data: xValues.map((x, index) => ({ x: x, y: actualYValues[index] })),
             borderWidth: 1,
-            pointStyle: 'circle', // Set point style as circle
+            pointStyle: 'circle', 
             pointRadius: 5
           }, {
             label: 'Predicted',
@@ -392,7 +614,7 @@
             showLine: false,
             data: xValues.map((x, index) => ({ x: x, y: predictedYValues[index] })),
             borderWidth: 1,
-            pointStyle: 'square', // Set point style as cross
+            pointStyle: 'square', 
             pointRadius: 5
           }]
         },
@@ -408,7 +630,7 @@
               position: 'bottom',
               scaleLabel: {
                 display: true,
-                labelString: 'X' 
+                labelString: 'X'
               }
             }],
             yAxes: [{
@@ -424,6 +646,30 @@
       });
     }
 
+    document.getElementById('downloadImage').addEventListener('click', function() {
+        const link = document.createElement('a');
+        link.href = currentChart.toBase64Image();
+        link.download = 'chart.png';
+        link.click();
+    });
+
+    document.getElementById('downloadExcel').addEventListener('click', function() {
+        const xValues = currentChart.data.datasets[0].data.map(point => point.x);
+        const actualYValues = currentChart.data.datasets[0].data.map(point => point.y);
+        const predictedYValues = currentChart.data.datasets[1].data.map(point => point.y);
+        
+        const data = xValues.map((x, index) => ({
+            X: x,
+            Actual: actualYValues[index],
+            Predicted: predictedYValues[index]
+        }));
+      
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+        XLSX.writeFile(workbook, 'data.xlsx');
+    });
+
     createScatterPlot(rf_data_test.xValues, rf_data_test.actualYValues, rf_data_test.predictedYValues);
 
     // Create the scatter plot
@@ -435,7 +681,6 @@
     //$("#0").click(() => createChart(rf_xValues, rf_actualYValues, rf_predictedYValues));
     //$("#1").click(() => createChart(xgb_xValues, xgb_actualYValues, xgb_predictedYValues));
     //$("#2").click(() => createChart(hybrid_xValues, hybrid_actualYValues, hybrid_predictedYValues));
-
 
     var gradientBarChartConfiguration = {
       maintainAspectRatio: false,
@@ -492,9 +737,9 @@
             datasets: [{
                 label: 'R-Squared',
                 data: [
-                    {{ harmonic_r2_training }}, 
-                    {{ harmonic_r2_XGB_training }}, 
-                    {{ harmonic_r2_mean_training }}
+                    {{ harmonic_r2_testing }}, 
+                    {{ harmonic_r2_XGB_testing }}, 
+                    {{ harmonic_r2_mean_testing }}
                 ],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)', // Red color for Random Forest
@@ -521,9 +766,9 @@
             datasets: [{
                 label: 'MSE',
                 data: [
-                    {{ harmonic_mse_training }}, 
-                    {{ harmonic_mse_XGB_training }}, 
-                    {{ weighted_average_mse_training }}
+                    {{ harmonic_mse_testing }}, 
+                    {{ harmonic_mse_XGB_testing }}, 
+                    {{ weighted_average_mse_testing }}
                 ],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)', // Red color for Random Forest
@@ -549,9 +794,9 @@
             datasets: [{
                 label: 'RMSE, asd, addsd',
                 data: [
-                    {{ harmonic_rmse_training }}, 
-                    {{ harmonic_rmse_XGB_training }}, 
-                    {{ weighted_average_rmse_training }}
+                    {{ harmonic_rmse_testing }}, 
+                    {{ harmonic_rmse_XGB_testing }}, 
+                    {{ weighted_average_rmse_testing }}
                 ],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)', // Red color for Random Forest
@@ -596,6 +841,6 @@
         },
         options: gradientBarChartConfiguration
     });
-    
+
 </script>
 {% endblock %}
