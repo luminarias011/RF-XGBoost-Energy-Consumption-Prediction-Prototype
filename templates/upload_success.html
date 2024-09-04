@@ -77,12 +77,12 @@
       <p>
         Dataset uploaded successfully: 
         <strong>{{ filename }}</strong><br>
-        <strong>{{ filename2 }}</strong>
+        <!--<strong>{{ filename2 }}</strong>-->
       </p>
       <form action="/simulate" method="post" enctype="multipart/form-data">
         <div class="form-group">
           <input type="hidden" name="filename" value="{{ filename }}" />
-          <input type="hidden" name="filename2" value="{{ filename2 }}" />
+          <!--<input type="hidden" name="filename2" value="{{ filename2 }}" />-->
         </div>
         <div class="form-group">
           <label for="mean_temp">Mean Outdoor Temperature (Celsius):</label>

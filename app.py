@@ -32,26 +32,26 @@ def upload_file():
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        file2 = request.files['file2']
-        if file2.filename == '':
-            flash('No selected second dataset')
-            return redirect(request.url)
+        # file2 = request.files['file2']
+        # if file2.filename == '':
+        #     flash('No selected second dataset')
+        #     return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filename2 = secure_filename(file2.filename)
+            # filename2 = secure_filename(file2.filename)
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            file2.save(os.path.join(app.config['UPLOAD_FOLDER'], filename2))
-            return render_template('upload_success.html', filename=filename, filename2=filename2)
+            # file2.save(os.path.join(app.config['UPLOAD_FOLDER'], filename2))
+            return render_template('upload_success.html', filename=filename)
+            # return render_template('upload_success.html', filename=filename, filename2=filename2)
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
     if request.method == 'POST':
         start_time = time.time() 
         
-        
         filename = request.form['filename']
-        filename2 = request.form['filename2']
+        # filename2 = request.form['filename2']
         mean_outdoor_temp = float(request.form['mean_outdoor_temp'])
         heating_temp_setting = float(request.form['heating_temp_setting'])
         cooling_temp_setting = float(request.form['cooling_temp_setting'])
@@ -76,8 +76,8 @@ def simulate():
         Y_heating = data['Heating Load']
         Y_cooling = data['Cooling Load']
 
-        X_train_heating, X_test_heating, y_train_heating, y_test_heating = train_test_split(X_BASE, Y_heating, test_size=0.3, random_state=20)
-        X_train_cooling, X_test_cooling, y_train_cooling, y_test_cooling = train_test_split(X_BASE, Y_cooling, test_size=0.3, random_state=20)
+        X_train_heating, X_test_heating, y_train_heating, y_test_heating = train_test_split(X_BASE, Y_heating, test_size=0.2, random_state=20)
+        X_train_cooling, X_test_cooling, y_train_cooling, y_test_cooling = train_test_split(X_BASE, Y_cooling, test_size=0.2, random_state=20)
 
         param_grid_rf = {
             'n_estimators': [100, 150],
@@ -166,7 +166,7 @@ def simulate():
 
         xgb_start_time = time.time()
         # Splitting data into training and testing sets
-        X_train, X_test, Y1_train, Y1_test, Y2_train, Y2_test = train_test_split(X, Y1, Y2, test_size=0.3, random_state=20)
+        X_train, X_test, Y1_train, Y1_test, Y2_train, Y2_test = train_test_split(X, Y1, Y2, test_size=0.2, random_state=20)
 
         # Best parameters for Heating Load
         best_params_heating = {'n_estimators': 100, 'learning_rate': 0.02, 'max_depth': 70, 'min_child_weight': 2}
@@ -231,6 +231,7 @@ def simulate():
         weight_heating = 2
         weight_cooling = 1
         harmonic_rmse_XGB_training = (rmse_train_heating * weight_heating + rmse_train_cooling * weight_cooling) / (weight_cooling + weight_heating)
+        
         # ? RMSE Combinatin for TESTING
         weight_heating = 2
         weight_cooling = 1
@@ -258,7 +259,7 @@ def simulate():
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
 
-        X_train, X_test, Y1_train, Y1_test, Y2_train, Y2_test = train_test_split(X_scaled, Y1, Y2, test_size=0.3, random_state=20)
+        X_train, X_test, Y1_train, Y1_test, Y2_train, Y2_test = train_test_split(X_scaled, Y1, Y2, test_size=0.2, random_state=20)
 
         rf_model_heating = RandomForestRegressor(random_state=20, n_estimators=500, max_depth=70, min_samples_split=3, min_samples_leaf=1, max_features='sqrt', bootstrap=False)
         rf_model_heating.fit(X_train, Y1_train)
@@ -397,63 +398,63 @@ def simulate():
         weighted_average_rmse_testing = (rmse_test_ensemble_heating * weight_heating + rmse_test_ensemble_cooling * weight_cooling) / (weight_cooling + weight_heating)
         
         # Load and preprocess new dataset for prediction
-        # new_data = pd.read_csv('new_dataset.csv')  # Replace with your new dataset file
-        dataset_path2 = os.path.join(app.config['UPLOAD_FOLDER'], filename2)
-        new_data = pd.read_csv(dataset_path2)
+        # @ new_data = pd.read_csv('new_dataset.csv')  # Replace with your new dataset file
+        # dataset_path2 = os.path.join(app.config['UPLOAD_FOLDER'], filename2)
+        # new_data = pd.read_csv(dataset_path2)
         
-        new_data['Mean Outdoor Temperature'] = mean_outdoor_temp
-        new_data['Heating Temperature Setting'] = heating_temp_setting
-        new_data['Cooling Temperature Setting'] = cooling_temp_setting
-        new_data['Lighting Power'] = lighting_power
-        new_data['Occupant Density'] = occupant_density
+        # new_data['Mean Outdoor Temperature'] = mean_outdoor_temp
+        # new_data['Heating Temperature Setting'] = heating_temp_setting
+        # new_data['Cooling Temperature Setting'] = cooling_temp_setting
+        # new_data['Lighting Power'] = lighting_power
+        # new_data['Occupant Density'] = occupant_density
 
-        # Impute missing values using the same imputer
-        new_data_imputed = pd.DataFrame(imputer.transform(new_data), columns=new_data.columns)
+        # @ Impute missing values using the same imputer
+        # new_data_imputed = pd.DataFrame(imputer.transform(new_data), columns=new_data.columns)
 
-        # Create new features
-        new_data_imputed['Volume'] = new_data_imputed['Surface Area'] * new_data_imputed['Overall Height']
-        new_data_imputed['Wall/Roof Ratio'] = new_data_imputed['Wall Area'] / new_data_imputed['Roof Area']
+        # @ Create new features
+        # new_data_imputed['Volume'] = new_data_imputed['Surface Area'] * new_data_imputed['Overall Height']
+        # new_data_imputed['Wall/Roof Ratio'] = new_data_imputed['Wall Area'] / new_data_imputed['Roof Area']
 
-        # Select features (make sure they are in the same order as during training)
-        X_new = new_data_imputed[X.columns]
+        # @ Select features (make sure they are in the same order as during training)
+        # X_new = new_data_imputed[X.columns]
 
-        # Scale the new data using the same scaler
-        X_new_scaled = scaler.transform(X_new)
+        # @ Scale the new data using the same scaler
+        # X_new_scaled = scaler.transform(X_new)
 
-        # Use the trained ensemble models to predict on new data without retraining
-        Y1_pred_new = heating_ensemble.predict(X_new_scaled)
-        Y2_pred_new = cooling_ensemble.predict(X_new_scaled)
+        # @ Use the trained ensemble models to predict on new data without retraining
+        # Y1_pred_new = heating_ensemble.predict(X_new_scaled)
+        # Y2_pred_new = cooling_ensemble.predict(X_new_scaled)
 
-        # Add predictions to the new dataset
-        new_data['Predicted Heating Load'] = Y1_pred_new
-        new_data['Predicted Cooling Load'] = Y2_pred_new
+        # @ Add predictions to the new dataset
+        # new_data['Predicted Heating Load'] = Y1_pred_new
+        # new_data['Predicted Cooling Load'] = Y2_pred_new
         
-        # hybrid_heating_data_test = list(zip(Y1_test.tolist(), Y1_pred_new.tolist()))
+        # @ hybrid_heating_data_test = list(zip(Y1_test.tolist(), Y1_pred_new.tolist()))
         
-        if 'Heating Load' in new_data.columns and 'Cooling Load' in new_data.columns:
-            Y1_true_new = new_data['Heating Load']
-            Y2_true_new = new_data['Cooling Load']
+        # if 'Heating Load' in new_data.columns and 'Cooling Load' in new_data.columns:
+        #     Y1_true_new = new_data['Heating Load']
+        #     Y2_true_new = new_data['Cooling Load']
 
             # Evaluation metrics for Heating Load on new data
-            r2_new_heating = r2_score(Y1_true_new, Y1_pred_new)
-            mse_new_heating = mean_squared_error(Y1_true_new, Y1_pred_new)
-            rmse_new_heating = np.sqrt(mse_new_heating)
+            # r2_new_heating = r2_score(Y1_true_new, Y1_pred_new)
+            # mse_new_heating = mean_squared_error(Y1_true_new, Y1_pred_new)
+            # rmse_new_heating = np.sqrt(mse_new_heating)
 
             # Evaluation metrics for Cooling Load on new data
-            r2_new_cooling = r2_score(Y2_true_new, Y2_pred_new)
-            mse_new_cooling = mean_squared_error(Y2_true_new, Y2_pred_new)
-            rmse_new_cooling = np.sqrt(mse_new_cooling)
+            # r2_new_cooling = r2_score(Y2_true_new, Y2_pred_new)
+            # mse_new_cooling = mean_squared_error(Y2_true_new, Y2_pred_new)
+            # rmse_new_cooling = np.sqrt(mse_new_cooling)
             
-            # ? MSE for Testing
-            new_weight_heating = 2
-            new_weight_cooling = 1
-            new_mse_testing = (mse_new_heating * new_weight_heating + mse_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
+            # # ? MSE for Testing
+            # new_weight_heating = 2
+            # new_weight_cooling = 1
+            # new_mse_testing = (mse_new_heating * new_weight_heating + mse_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
 
-            # ? R-Squared for TESTING
-            new_r2_testing = (r2_new_heating * new_weight_heating + r2_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
+            # # ? R-Squared for TESTING
+            # new_r2_testing = (r2_new_heating * new_weight_heating + r2_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
 
-            # ? RMSE for Testing
-            new_rmse_testing = (rmse_new_heating * new_weight_heating + rmse_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
+            # # ? RMSE for Testing
+            # new_rmse_testing = (rmse_new_heating * new_weight_heating + rmse_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
 
             # print("\nNew Data Set Results:")
             # print(f"Heating Load: R² = {r2_new_heating:.4f}, MSE = {mse_new_heating:.4f}, RMSE = {rmse_new_heating:.4f}")
@@ -514,9 +515,9 @@ def simulate():
                                     # combined_cv_score_mse = combined_cv_score_mse,
                                     # combined_cv_score_rmse = combined_cv_score_rmse,
                                     # ? TEST DATASET
-                                    new_r2_testing=new_r2_testing,
-                                    new_mse_testing=new_mse_testing,
-                                    new_rmse_testing=new_rmse_testing
+                                    # new_r2_testing=new_r2_testing,
+                                    # new_mse_testing=new_mse_testing,
+                                    # new_rmse_testing=new_rmse_testing
                               )
 
 if __name__ == '__main__':
