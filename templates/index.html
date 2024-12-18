@@ -25,9 +25,13 @@
       <div class="col-md-4">
         <form action="/upload" method="post" enctype="multipart/form-data">
           <div class="form-group">
-            <label class="form-control custom-file-label" for="file">Select dataset file (CSV format):</label><br />
-            <input class="form-control custom-file-input" type="file" id="file" name="file" accept=".csv" /><br />
+            <label class="form-control custom-file-label" for="file">Select dataset file (CSV format):</label><br/>
+            <input class="form-control custom-file-input" type="file" id="file" name="file" accept=".csv" required/><br />
           </div>
+          <!--<div class="form-group">
+            <label class="form-control custom-file-label" for="file2">Select second dataset for testing (CSV format):</label><br />
+            <input class="form-control custom-file-input" type="file" id="file2" name="file2" accept=".csv" required/><br />
+          </div>-->
           <button class="btn mt-3" type="submit" value="Upload">Upload</button>
         </form>
       </div>

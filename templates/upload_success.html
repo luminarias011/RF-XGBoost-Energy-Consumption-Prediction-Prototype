@@ -64,38 +64,60 @@
 {% endblock %}
 
 {% block content %}
-  <div class="content">
-    <div class="row">
-      <div class="col-md-12 text-center">
-        <h1>Start Prediction</h1>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-4"></div>
-      <div class="col-md-4">
-        <p>
-          Dataset uploaded successfully: <strong>{{ filename }}</strong>
-        </p>
-        <form action="/simulate" method="post">
-          <div class="form-group">
-            <input type="hidden" name="filename" value="{{ filename }}" />
-          </div>
-          <button class="btn mt-3" type="submit" id="runSimulationBtn" value="Run Simulation">Run Models</button>
-        </form>
-      </div>
-      <div class="col-md-4"></div>
-    </div>
-
-    <br /><br />
-    <div class="row mt-5">
-      <div class="col center text-center justify-content-center">
-        <div class="loader mx-auto" id="loader">
-        </div>
-        <p class="loader" id="loader">Running</p>
-      </div>
+<div class="content">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <h1>Start Prediction</h1>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+      <p>
+        Dataset uploaded successfully: 
+        <strong>{{ filename }}</strong><br>
+        <!--<strong>{{ filename2 }}</strong>-->
+      </p>
+      <form action="/simulate" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <input type="hidden" name="filename" value="{{ filename }}" />
+          <!--<input type="hidden" name="filename2" value="{{ filename2 }}" />-->
+        </div>
+        <div class="form-group">
+          <label for="mean_temp">Mean Outdoor Temperature (Celsius):</label>
+          <input type="text" class="form-control" id="mean_temp" name="mean_outdoor_temp" value="7" required>
+        </div>
+        <div class="form-group">
+          <label for="heating_temp">Heating Temperature Setting (Celsius):</label>
+          <input type="text" class="form-control" id="heating_temp" name="heating_temp_setting" value="32" required>
+        </div>
+        <div class="form-group">
+          <label for="cooling_temp">Cooling Temperature Setting (Celsius):</label>
+          <input type="text" class="form-control" id="cooling_temp" name="cooling_temp_setting" value="16" required>
+        </div>
+        <div class="form-group">
+          <label for="lighting_power">Lighting Power (W/m^2):</label>
+          <input type="text" class="form-control" id="lighting_power" name="lighting_power" value="5" required>
+        </div>
+        <div class="form-group">
+          <label for="occupant_density">Occupant Density (People/m^2):</label>
+          <input type="text" class="form-control" id="occupant_density" name="occupant_density" value="0.3" required>
+        </div>
+        <button class="btn mt-3" type="submit" id="runSimulationBtn" value="Run Simulation">Run Models</button>
+      </form>
+    </div>
+    <div class="col-md-4"></div>
+  </div>
+
+  <br /><br />
+  <div class="row mt-2">
+    <div class="col center text-center justify-content-center mb-n3">
+      <div class="loader mx-auto" id="loader"></div>
+      <p class="loader" id="loader">Running</p>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}

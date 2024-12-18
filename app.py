@@ -3,9 +3,9 @@ from werkzeug.utils import secure_filename
 import os
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, KFold, cross_val_score
 from sklearn.ensemble import RandomForestRegressor, VotingRegressor
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, make_scorer
 import xgboost as xgb
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
@@ -32,23 +32,42 @@ def upload_file():
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+        # file2 = request.files['file2']
+        # if file2.filename == '':
+        #     flash('No selected second dataset')
+        #     return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
+            # filename2 = secure_filename(file2.filename)
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # file2.save(os.path.join(app.config['UPLOAD_FOLDER'], filename2))
             return render_template('upload_success.html', filename=filename)
+            # return render_template('upload_success.html', filename=filename, filename2=filename2)
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
     if request.method == 'POST':
         start_time = time.time() 
+        
         filename = request.form['filename']
-        dataset_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # filename2 = request.form['filename2']
+        mean_outdoor_temp = float(request.form['mean_outdoor_temp'])
+        heating_temp_setting = float(request.form['heating_temp_setting'])
+        cooling_temp_setting = float(request.form['cooling_temp_setting'])
+        lighting_power = float(request.form['lighting_power'])
+        occupant_density = float(request.form['occupant_density'])
+        
+        print("Received form data:", request.form)
 
+        dataset_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         data = pd.read_csv(dataset_path)
+        
+        data['Mean Outdoor Temperature'] = mean_outdoor_temp
+        data['Heating Temperature Setting'] = heating_temp_setting
+        data['Cooling Temperature Setting'] = cooling_temp_setting
+        data['Lighting Power'] = lighting_power
+        data['Occupant Density'] = occupant_density
         
         # ? BASE
         rf_start_time = time.time()
@@ -212,6 +231,7 @@ def simulate():
         weight_heating = 2
         weight_cooling = 1
         harmonic_rmse_XGB_training = (rmse_train_heating * weight_heating + rmse_train_cooling * weight_cooling) / (weight_cooling + weight_heating)
+        
         # ? RMSE Combinatin for TESTING
         weight_heating = 2
         weight_cooling = 1
@@ -246,20 +266,70 @@ def simulate():
 
         rf_model_cooling = RandomForestRegressor(random_state=20, n_estimators=500, max_depth=70, min_samples_split=3, min_samples_leaf=1, max_features='sqrt', bootstrap=False)
         rf_model_cooling.fit(X_train, Y2_train)
+        
+        # Custom scoring functions
+        # mse_scorer = make_scorer(mean_squared_error, greater_is_better=False)
+        # rmse_scorer = make_scorer(lambda y_true, y_pred: np.sqrt(mean_squared_error(y_true, y_pred)), greater_is_better=False)
+        
+        #Validation RF
+        # cv_scores_heating_rf = cross_val_score(rf_model_heating, X, Y1, cv=30, scoring='r2')
+        # cv_scores_cooling_rf = cross_val_score(rf_model_cooling, X, Y2, cv=30, scoring='r2')
+        
+        # cv_scores_heating_rf_mse = cross_val_score(rf_model_heating, X, Y1, cv=30, scoring=mse_scorer)
+        # cv_scores_cooling_rf_mse = cross_val_score(rf_model_cooling, X, Y2, cv=30, scoring=mse_scorer)
+        
+        # cv_scores_heating_rf_rmse = cross_val_score(rf_model_heating, X, Y1, cv=30, scoring=rmse_scorer)
+        # cv_scores_cooling_rf_rmse = cross_val_score(rf_model_cooling, X, Y2, cv=30, scoring=rmse_scorer)
+        
+        # combined_cv_score_rf_r2 = (np.mean(cv_scores_heating_rf) * weight_heating + np.mean(cv_scores_cooling_rf) * weight_cooling) / (weight_heating + weight_cooling)
+        # combined_cv_score_rf_mse = (np.mean(cv_scores_heating_rf_mse) * weight_heating + np.mean(cv_scores_cooling_rf_mse) * weight_cooling) / (weight_heating + weight_cooling)
+        # combined_cv_score_rf_rmse = (np.mean(cv_scores_heating_rf_rmse) * weight_heating + np.mean(cv_scores_cooling_rf_rmse) * weight_cooling) / (weight_heating + weight_cooling)
 
         xgb_model_heating = xgb.XGBRegressor(objective='reg:squarederror', eval_metric='rmse', subsample=0.8, random_state=20, n_estimators=2000, max_depth=70, learning_rate=0.05, min_child_weight=2, gamma=0, colsample_bytree=0.6)
         xgb_model_heating.fit(X_train, Y1_train)
 
         xgb_model_cooling = xgb.XGBRegressor(objective='reg:squarederror', eval_metric='rmse', subsample=0.8, random_state=20, n_estimators=2000, max_depth=70, learning_rate=0.05, min_child_weight=2, gamma=0, colsample_bytree=0.6)
         xgb_model_cooling.fit(X_train, Y2_train)
+        
+        #Validation XGB
+        # cv_scores_heating_xgb = cross_val_score(xgb_model_heating, X, Y1, cv=30, scoring='r2')
+        # cv_scores_cooling_xgb = cross_val_score(xgb_model_cooling, X, Y2, cv=30, scoring='r2')
+        
+        # cv_scores_heating_xgb_mse = cross_val_score(xgb_model_heating, X, Y1, cv=30, scoring=mse_scorer)
+        # cv_scores_cooling_xgb_mse = cross_val_score(xgb_model_cooling, X, Y2, cv=30, scoring=mse_scorer)
+        
+        # cv_scores_heating_xgb_rmse = cross_val_score(xgb_model_heating, X, Y1, cv=30, scoring=rmse_scorer)
+        # cv_scores_cooling_xgb_rmse = cross_val_score(xgb_model_cooling, X, Y2, cv=30, scoring=rmse_scorer)
+        
+        # combined_cv_score_xgb_r2 = (np.mean(cv_scores_heating_xgb) * weight_heating + np.mean(cv_scores_cooling_xgb) * weight_cooling) / (weight_heating + weight_cooling)
+        # combined_cv_score_xgb_mse = (np.mean(cv_scores_heating_xgb_mse) * weight_heating + np.mean(cv_scores_cooling_xgb_mse) * weight_cooling) / (weight_heating + weight_cooling)
+        # combined_cv_score_xgb_rmse = (np.mean(cv_scores_heating_xgb_rmse) * weight_heating + np.mean(cv_scores_cooling_xgb_rmse) * weight_cooling) / (weight_heating + weight_cooling)
 
         heating_models = [('Random Forest', rf_model_heating), ('XGBoost', xgb_model_heating)]
-        heating_ensemble = VotingRegressor(heating_models)
+        heating_ensemble = VotingRegressor(heating_models, weights=[1, 3])
         heating_ensemble.fit(X_train, Y1_train)
 
         cooling_models = [('Random Forest', rf_model_cooling), ('XGBoost', xgb_model_cooling)]
-        cooling_ensemble = VotingRegressor(cooling_models)
+        cooling_ensemble = VotingRegressor(cooling_models, weights=[1, 3])
         cooling_ensemble.fit(X_train, Y2_train)
+        
+        #Validation HYBRID ENSEMBLE
+        # cv_scores_cooling = cross_val_score(cooling_ensemble, X, Y2, cv=30, scoring='r2')
+        # cv_scores_heating = cross_val_score(heating_ensemble, X, Y1, cv=30, scoring='r2')
+        
+        # cv_scores_heating_mse = cross_val_score(heating_ensemble, X, Y1, cv=30, scoring=mse_scorer)
+        # cv_scores_cooling_mse = cross_val_score(cooling_ensemble, X, Y2, cv=30, scoring=mse_scorer)
+        
+        # cv_scores_heating_rmse = cross_val_score(heating_ensemble, X, Y1, cv=30, scoring=rmse_scorer)
+        # cv_scores_cooling_rmse = cross_val_score(cooling_ensemble, X, Y2, cv=30, scoring=rmse_scorer)
+        
+        # Combine cross-validation scores
+        # weight_heating = 2
+        # weight_cooling = 1
+        
+        # combined_cv_score_r2 = (np.mean(cv_scores_heating) * weight_heating + np.mean(cv_scores_cooling) * weight_cooling) / (weight_heating + weight_cooling)
+        # combined_cv_score_mse = (np.mean(cv_scores_heating_mse) * weight_heating + np.mean(cv_scores_cooling_mse) * weight_cooling) / (weight_heating + weight_cooling)
+        # combined_cv_score_rmse = (np.mean(cv_scores_heating_rmse) * weight_heating + np.mean(cv_scores_cooling_rmse) * weight_cooling) / (weight_heating + weight_cooling)
 
         Y1_pred_train_ensemble = heating_ensemble.predict(X_train)
         Y1_pred_test_ensemble = heating_ensemble.predict(X_test)
@@ -285,15 +355,14 @@ def simulate():
         
         
         # ! HEATING
-        hybrid_heating_data = list(zip(Y1_train.tolist(), Y1_pred_train_ensemble.tolist()))
+        hybrid_heating_data = list(zip(Y1_test.tolist(), Y1_pred_train_ensemble.tolist()))
         # ? COOLING
-        hybrid_cooling_data = list(zip(Y2_train.tolist(), Y2_pred_train_ensemble.tolist()))
+        hybrid_cooling_data = list(zip(Y2_test.tolist(), Y2_pred_train_ensemble.tolist()))
         
         # ! HEATING TEST
         hybrid_heating_data_test = list(zip(Y1_test.tolist(), Y1_pred_test_ensemble.tolist()))
         # ? COOLING TEST
         hybrid_cooling_data_test = list(zip(Y2_test.tolist(), Y2_pred_test_ensemble.tolist()))
-        
 
         # ! Combining training and testing Metrics
 
@@ -327,6 +396,69 @@ def simulate():
         weight_heating = 2
         weight_cooling = 1
         weighted_average_rmse_testing = (rmse_test_ensemble_heating * weight_heating + rmse_test_ensemble_cooling * weight_cooling) / (weight_cooling + weight_heating)
+        
+        # Load and preprocess new dataset for prediction
+        # @ new_data = pd.read_csv('new_dataset.csv')  # Replace with your new dataset file
+        # dataset_path2 = os.path.join(app.config['UPLOAD_FOLDER'], filename2)
+        # new_data = pd.read_csv(dataset_path2)
+        
+        # new_data['Mean Outdoor Temperature'] = mean_outdoor_temp
+        # new_data['Heating Temperature Setting'] = heating_temp_setting
+        # new_data['Cooling Temperature Setting'] = cooling_temp_setting
+        # new_data['Lighting Power'] = lighting_power
+        # new_data['Occupant Density'] = occupant_density
+
+        # @ Impute missing values using the same imputer
+        # new_data_imputed = pd.DataFrame(imputer.transform(new_data), columns=new_data.columns)
+
+        # @ Create new features
+        # new_data_imputed['Volume'] = new_data_imputed['Surface Area'] * new_data_imputed['Overall Height']
+        # new_data_imputed['Wall/Roof Ratio'] = new_data_imputed['Wall Area'] / new_data_imputed['Roof Area']
+
+        # @ Select features (make sure they are in the same order as during training)
+        # X_new = new_data_imputed[X.columns]
+
+        # @ Scale the new data using the same scaler
+        # X_new_scaled = scaler.transform(X_new)
+
+        # @ Use the trained ensemble models to predict on new data without retraining
+        # Y1_pred_new = heating_ensemble.predict(X_new_scaled)
+        # Y2_pred_new = cooling_ensemble.predict(X_new_scaled)
+
+        # @ Add predictions to the new dataset
+        # new_data['Predicted Heating Load'] = Y1_pred_new
+        # new_data['Predicted Cooling Load'] = Y2_pred_new
+        
+        # @ hybrid_heating_data_test = list(zip(Y1_test.tolist(), Y1_pred_new.tolist()))
+        
+        # if 'Heating Load' in new_data.columns and 'Cooling Load' in new_data.columns:
+        #     Y1_true_new = new_data['Heating Load']
+        #     Y2_true_new = new_data['Cooling Load']
+
+            # Evaluation metrics for Heating Load on new data
+            # r2_new_heating = r2_score(Y1_true_new, Y1_pred_new)
+            # mse_new_heating = mean_squared_error(Y1_true_new, Y1_pred_new)
+            # rmse_new_heating = np.sqrt(mse_new_heating)
+
+            # Evaluation metrics for Cooling Load on new data
+            # r2_new_cooling = r2_score(Y2_true_new, Y2_pred_new)
+            # mse_new_cooling = mean_squared_error(Y2_true_new, Y2_pred_new)
+            # rmse_new_cooling = np.sqrt(mse_new_cooling)
+            
+            # # ? MSE for Testing
+            # new_weight_heating = 2
+            # new_weight_cooling = 1
+            # new_mse_testing = (mse_new_heating * new_weight_heating + mse_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
+
+            # # ? R-Squared for TESTING
+            # new_r2_testing = (r2_new_heating * new_weight_heating + r2_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
+
+            # # ? RMSE for Testing
+            # new_rmse_testing = (rmse_new_heating * new_weight_heating + rmse_new_cooling * new_weight_cooling) / (new_weight_cooling + new_weight_heating)
+
+            # print("\nNew Data Set Results:")
+            # print(f"Heating Load: R² = {r2_new_heating:.4f}, MSE = {mse_new_heating:.4f}, RMSE = {rmse_new_heating:.4f}")
+            # print(f"Cooling Load: R² = {r2_new_cooling:.4f}, MSE = {mse_new_cooling:.4f}, RMSE = {rmse_new_cooling:.4f}")
         
         hybrid_elapsed_time = time.time() - hybrid_start_time
         
@@ -369,8 +501,25 @@ def simulate():
                                     rf_elapsed_time=rf_elapsed_time,
                                     xgb_elapsed_time=xgb_elapsed_time,
                                     hybrid_elapsed_time=hybrid_elapsed_time,
-                                    total_elapsed_time=total_elapsed_time
+                                    total_elapsed_time=total_elapsed_time,
+                                    # ! VALIDATION RF
+                                    # combined_cv_score_rf_r2 = combined_cv_score_rf_r2,
+                                    # combined_cv_score_rf_mse = combined_cv_score_rf_mse,
+                                    # combined_cv_score_rf_rmse = combined_cv_score_rf_rmse,
+                                    # # ! VALIDATION XGB
+                                    # combined_cv_score_xgb_r2 = combined_cv_score_xgb_r2,
+                                    # combined_cv_score_xgb_mse = combined_cv_score_xgb_mse,
+                                    # combined_cv_score_xgb_rmse = combined_cv_score_xgb_rmse,
+                                    # ! VALIDATION HYBRID ENSEMBLE
+                                    # combined_cv_score_r2 = combined_cv_score_r2,
+                                    # combined_cv_score_mse = combined_cv_score_mse,
+                                    # combined_cv_score_rmse = combined_cv_score_rmse,
+                                    # ? TEST DATASET
+                                    # new_r2_testing=new_r2_testing,
+                                    # new_mse_testing=new_mse_testing,
+                                    # new_rmse_testing=new_rmse_testing
                               )
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # app.run(host="0.0.0.0", port=5000)
